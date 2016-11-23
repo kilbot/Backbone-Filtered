@@ -8,12 +8,17 @@ module.exports = function(parent) {
 
   var FilteredCollection = parent.extend({
 
-    constructor: function () {
+    constructor: function(){
       parent.apply(this, arguments);
       this._filters = {};
+      if(this.superset === true){
+        this.superset = this.toJSON();
+      }
     },
 
+    matchMaker: matchMaker,
 
+    /* jshint: -W071 -W074 */
     setFilter: function (filterName, filter) {
       if (filter === undefined) {
         filter = filterName;
@@ -28,8 +33,18 @@ module.exports = function(parent) {
       };
       this.trigger('filtered:set');
 
-      return this.fetch({data: {filter: this.getFilterOptions()}});
+      if(this.superset){
+        return this.supersetFetch();
+      }
+
+      if(this._filterOptions && this._filterOptions.xhr){
+        debugger;
+      }
+
+      this._filterOptions = {data: {filter: this.getFilterOptions()}};
+      return this.fetch(this._filterOptions);
     },
+    /* jshint: +W071 +W074 */
 
     removeFilter: function (filterName) {
       if (!filterName) {
@@ -38,12 +53,19 @@ module.exports = function(parent) {
       delete this._filters[filterName];
       this.trigger('filtered:remove');
 
+      if(this.superset){
+        return this.supersetFetch();
+      }
       return this.fetch({data: {filter: this.getFilterOptions()}});
     },
 
     resetFilters: function () {
       this._filters = {};
       this.trigger('filtered:reset');
+      if(this.superset){
+        return this.reset(this.superset);
+      }
+      this.reset();
       return this.fetch();
     },
 
@@ -64,7 +86,8 @@ module.exports = function(parent) {
 
     getFilterOptions: function () {
       if (this.hasFilters()) {
-        return {q: this.getFilterQueries(), fields: this.fields};
+        var fields = _.isArray(this.fields) ? this.fields.join(',') : this.fields;
+        return {q: this.getFilterQueries(), fields: fields};
       }
     },
 
@@ -89,6 +112,14 @@ module.exports = function(parent) {
       }
 
       return queries;
+    },
+
+    supersetFetch: function(){
+      var self = this;
+      var models = _.filter(this.superset, function(model){
+        return matchMaker(model, self.getFilterQueries(), {fields: self.fields});
+      });
+      return this.reset(models);
     }
 
   });
