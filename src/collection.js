@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var Parser = require('query-parser');
 var parse = new Parser();
+var matchMaker = require('json-query');
 
 var defaultFilterName = '__default';
 
