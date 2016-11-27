@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     watch: {
       js: {
         files: ['src/*.js'],
-        tasks: ['jshint', 'webpack']
+        tasks: ['jshint']
       },
       test: {
        files: ['test/*.js', 'src/*.js'],
@@ -21,6 +21,7 @@ module.exports = function(grunt) {
      all: {
        src: [
          'test/setup.js',
+         'test/helpers.js',
          'test/spec.js'
        ]
      }

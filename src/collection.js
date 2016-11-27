@@ -3,7 +3,7 @@ var Parser = require('query-parser');
 var parse = new Parser();
 var matchMaker = require('json-query');
 
-var defaultFilterName = '__default';
+var defaultQueryName = '__default';
 
 module.exports = function(parent) {
 
@@ -11,89 +11,103 @@ module.exports = function(parent) {
 
     constructor: function(){
       parent.apply(this, arguments);
-      this._filters = {};
-      if(this.superset === true){
-        this.superset = this.toJSON();
-      }
+
+      // clone this.initialState to this.state
+      this.state = _.clone(this.initialState || {}, true);
+
+      // if(this.superset === true){
+      //   this.superset = this.toJSON();
+      // }
     },
 
-    matchMaker: matchMaker,
-
-    /* jshint: -W071 -W074 */
-    setFilter: function (filterName, filter) {
-      if (filter === undefined) {
-        filter = filterName;
-        filterName = defaultFilterName;
+    sync: function(method, collection, options){
+      if(method === 'read'){
+        // merge options.data.filter and this.state.filter
+        var filter = _.get(options, ['data'], {});
+        var merged = _.merge(this.getFilter(), filter);
+        if(!_.isEmpty(merged)){
+          _.set(options, ['data', 'filter'], merged);
+        }
       }
-      if (!filter) {
-        return this.removeFilter(filterName);
-      }
-      this._filters[filterName] = {
-        string: filter,
-        query : _.isString(filter) ? parse(filter) : filter
-      };
-      this.trigger('filtered:set');
-
-      if(this.superset){
-        return this.supersetFetch();
-      }
-
-      if(this._filterOptions && this._filterOptions.xhr){
-        debugger;
-      }
-
-      this._filterOptions = {data: {filter: this.getFilterOptions()}};
-      return this.fetch(this._filterOptions);
-    },
-    /* jshint: +W071 +W074 */
-
-    removeFilter: function (filterName) {
-      if (!filterName) {
-        filterName = defaultFilterName;
-      }
-      delete this._filters[filterName];
-      this.trigger('filtered:remove');
-
-      if(this.superset){
-        return this.supersetFetch();
-      }
-      return this.fetch({data: {filter: this.getFilterOptions()}});
+      return parent.prototype.sync.call(this, method, collection, options);
     },
 
-    resetFilters: function () {
-      this._filters = {};
-      this.trigger('filtered:reset');
-      if(this.superset){
-        return this.reset(this.superset);
+    getFilter: function(){
+      var filter = _.get(this.state, ['filter']);
+      var obj = _.pick( filter, ['limit', 'order', 'orderby'] );
+      var queries = this.compactQueries();
+      if( !_.isEmpty(queries) ){
+        obj.q = queries;
+        obj.qFields = filter.qFields;
       }
-      this.reset();
-      return this.fetch();
+      return obj;
     },
 
-    getFilters: function (name) {
-      if (name) {
-        return this._filters[name];
+    setFilter: function(name, value){
+      var filter, merged, obj = {};
+      if(_.isString(name)){
+        obj[name] = value;
+      } else {
+        obj = name;
       }
-      return this._filters;
+      filter = _.get(this.state, ['filter'], {});
+      merged = _.merge(filter, obj);
+      _.set(this, ['state', 'filter'], merged);
     },
 
-    hasFilter: function (name) {
-      return _.includes(_.keys(this.getFilters()), name);
-    },
-
-    hasFilters: function () {
-      return _.size(this.getFilters()) > 0;
-    },
-
-    getFilterOptions: function () {
-      if (this.hasFilters()) {
-        var fields = _.isArray(this.fields) ? this.fields.join(',') : this.fields;
-        return {q: this.getFilterQueries(), fields: fields};
+    resetFilters: function(obj){
+      if(!_.isObject(obj)){
+        obj = _.get(this.initialState, 'filter', {});
       }
+      _.set(this, 'state', {
+        filter: obj,
+        queries: {}
+      });
     },
 
-    getFilterQueries: function () {
-      var queries = _(this.getFilters()).map('query').flattenDeep().value();
+    setQuery: function (queryName, query) {
+        if (query === undefined) {
+          query = queryName;
+          queryName = defaultQueryName;
+        }
+        if (!query) {
+          return this.removeQuery(queryName);
+        }
+      _.set(this.state, ['queries', queryName], {
+          string: query,
+          query : _.isString(query) ? parse(query) : query
+        });
+    },
+
+    getQueries: function(){
+      return _.get(this.state, 'queries');
+    },
+
+    // hasQueries: function () {
+    //   return _.size( this.getQueries() ) > 0;
+    // },
+
+    hasQuery: function (name) {
+      return _.includes( _.keys( this.getQueries() ), name );
+    },
+
+
+    compactQueries: function () {
+      var queries = _( this.getQueries() )
+        .map('query')
+        .flattenDeep()
+        .value();
+
+      // add filter.q
+      var q = _.get(this.state, ['filter', 'q']);
+      if(_.isString(q)){
+        queries.unshift({
+          type: 'string',
+          query: q
+        });
+      } else if(_.isObject(q)) {
+        queries.unshift(q);
+      }
 
       // compact
       if (queries.length > 1) {
@@ -115,13 +129,22 @@ module.exports = function(parent) {
       return queries;
     },
 
-    supersetFetch: function(){
-      var self = this;
-      var models = _.filter(this.superset, function(model){
-        return matchMaker(model, self.getFilterQueries(), {fields: self.fields});
-      });
-      return this.reset(models);
+    removeQuery: function (queryName) {
+      if (!queryName) {
+        queryName = defaultQueryName;
+      }
+      if(this.hasQuery(queryName)){
+        delete this.state.queries[queryName];
+      }
     }
+
+    // supersetFetch: function(){
+    //   var self = this;
+    //   var models = _.filter(this.superset, function(model){
+    //     return matchMaker(model, self.getFilterQueries(), {fields: self.fields});
+    //   });
+    //   return this.reset(models);
+    // }
 
   });
 
