@@ -53,6 +53,9 @@ module.exports = function(parent) {
       filter = _.get(this.state, ['filter'], {});
       merged = _.merge(filter, obj);
       _.set(this, ['state', 'filter'], merged);
+
+      // make chainable
+      return this;
     },
 
     resetFilters: function(obj){
@@ -63,6 +66,9 @@ module.exports = function(parent) {
         filter: obj,
         queries: {}
       });
+
+      // make chainable
+      return this;
     },
 
     setQuery: function (queryName, query) {
@@ -74,9 +80,12 @@ module.exports = function(parent) {
           return this.removeQuery(queryName);
         }
       _.set(this.state, ['queries', queryName], {
-          string: query,
-          query : _.isString(query) ? parse(query) : query
-        });
+        string: query,
+        query : _.isString(query) ? parse(query) : query
+      });
+
+      // make chainable
+      return this;
     },
 
     getQueries: function(){
@@ -136,6 +145,9 @@ module.exports = function(parent) {
       if(this.hasQuery(queryName)){
         delete this.state.queries[queryName];
       }
+
+      // make chainable
+      return this;
     }
 
     // supersetFetch: function(){
