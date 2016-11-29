@@ -365,4 +365,23 @@ describe('filter collection', function(){
     expect(collection.hasQuery('search')).to.be.false;
   });
 
+  it('should have comparator consistent with state.filter', function(){
+    collection.add([
+      { title: 'foo', price: 10 },
+      { title: 'bar', price: 100 },
+      { title: 'baz', price: 1 },
+    ]);
+
+    // default sort by title ASC
+    expect(collection.map('title')).eqls(['bar', 'baz', 'foo']);
+
+    // sort by title DESC
+    collection.setFilter({ order: 'DESC' }).sort();
+    expect(collection.map('title')).eqls(['foo', 'baz', 'bar']);
+
+    // sort by price
+    collection.setFilter({ orderby: 'price', order: 'ASC' }).sort();
+    expect(collection.map('price')).eqls([1, 10, 100]);
+  });
+
 });

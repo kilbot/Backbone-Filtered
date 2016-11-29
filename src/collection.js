@@ -20,6 +20,20 @@ module.exports = function(parent) {
       // }
     },
 
+    comparator: function(model){
+      return model.get( _.get(this.state, ['filter', 'orderby']) ) || model.id;
+    },
+
+    sort: function(options){
+      var order = _.get(this.state, ['filter', 'order'], 'ASC');
+      this.models = _.sortByOrder(this.models, this.comparator.bind(this), order.toLowerCase());
+
+      if (!_.get(options, 'silent')) {
+        this.trigger('sort', this, options);
+      }
+      return this;
+    },
+
     sync: function(method, collection, options){
       if(method === 'read'){
         var filter = _.get(options, ['data', 'filter']) || this.getFilter();
