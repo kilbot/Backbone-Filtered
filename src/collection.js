@@ -22,16 +22,17 @@ module.exports = function(parent) {
 
     sync: function(method, collection, options){
       if(method === 'read'){
-        // merge options.data.filter and this.state.filter
-        var filter = _.get(options, ['data'], {});
-        var merged = _.merge(this.getFilter(), filter);
-        if(!_.isEmpty(merged)){
-          _.set(options, ['data', 'filter'], merged);
+        var filter = _.get(options, ['data', 'filter']) || this.getFilter();
+        if( !_.isEmpty(filter) ){
+          _.set(options, ['data', 'filter'], filter);
         }
       }
       return parent.prototype.sync.call(this, method, collection, options);
     },
 
+    /**
+     *
+     */
     getFilter: function(){
       var filter = _.get(this.state, ['filter']);
       var obj = _.pick( filter, ['limit', 'order', 'orderby'] );

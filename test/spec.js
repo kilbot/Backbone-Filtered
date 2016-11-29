@@ -40,18 +40,18 @@ describe('filter collection', function(){
     });
   });
 
-  it('should merge fetch options with initial state', function(){
+  it('should give precedence to fetch options', function(){
     collection.fetch({
       data: {
-        order: 'DESC'
+        filter: {
+          limit: -1
+        }
       }
     });
 
     var options = spy.args[0][2];
     expect(options.data.filter).to.eql({
-      order: 'DESC',
-      orderby: 'title',
-      limit: 10
+      limit: -1
     });
   });
 
