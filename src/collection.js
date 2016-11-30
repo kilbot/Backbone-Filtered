@@ -4,6 +4,16 @@ var parse = new Parser();
 var matchMaker = require('json-query');
 
 var defaultQueryName = '__default';
+var allowedFilters = [
+  'limit',
+  'order',
+  'orderby',
+  'in',
+  'not_in',
+  'offset'
+  // q,       // added later
+  // qFields  // depends on q
+];
 
 module.exports = function(parent) {
 
@@ -49,7 +59,7 @@ module.exports = function(parent) {
      */
     getFilter: function(){
       var filter = _.get(this.state, ['filter']);
-      var obj = _.pick( filter, ['limit', 'order', 'orderby'] );
+      var obj = _.pick( filter, allowedFilters );
       var queries = this.compactQueries();
       if( !_.isEmpty(queries) ){
         obj.q = queries;
