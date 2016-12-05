@@ -8,6 +8,7 @@ var allowedFilters = [
   'limit',
   'order',
   'orderby',
+  'meta_key',
   'in',
   'not_in',
   'offset'
@@ -23,7 +24,7 @@ module.exports = function(parent) {
       parent.apply(this, arguments);
 
       // clone this.initialState to this.state
-      this.state = _.clone(this.initialState || {}, true);
+      this.state = _.cloneDeep( this.initialState );
 
       // if(this.superset === true){
       //   this.superset = this.toJSON();
@@ -85,7 +86,8 @@ module.exports = function(parent) {
 
     resetFilters: function(obj){
       if(!_.isObject(obj)){
-        obj = _.get(this.initialState, 'filter', {});
+        var initialState = _.cloneDeep(this.initialState);
+        obj = _.get(initialState, 'filter', {});
       }
       _.set(this, 'state', {
         filter: obj,
