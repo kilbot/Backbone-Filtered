@@ -64,7 +64,7 @@ module.exports = function(parent) {
       var queries = this.compactQueries();
       if( !_.isEmpty(queries) ){
         obj.q = queries;
-        obj.qFields = filter.qFields;
+        obj.qFields = _.get(filter, 'qFields');
       }
       return obj;
     },
