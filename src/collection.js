@@ -106,7 +106,7 @@ module.exports = function(parent) {
         if (!query) {
           return this.removeQuery(queryName);
         }
-      _.set(this.state, ['queries', queryName], {
+      _.set(this, ['state', 'queries', queryName], {
         string: query,
         query : _.isString(query) ? parse(query) : query
       });
