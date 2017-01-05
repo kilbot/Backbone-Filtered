@@ -25,14 +25,15 @@ module.exports = function(parent) {
 
       // clone this.initialState to this.state
       this.state = _.cloneDeep( this.initialState );
-
-      // if(this.superset === true){
-      //   this.superset = this.toJSON();
-      // }
     },
 
     comparator: function(model){
-      return model.get( _.get(this.state, ['filter', 'orderby']) ) || model.id;
+      var orderBy = _.get(this.state, ['filter', 'orderby']);
+      if(orderBy){
+        return model.get( orderBy );
+      } else {
+        return model.id;
+      }
     },
 
     sort: function(options){
@@ -177,13 +178,8 @@ module.exports = function(parent) {
       return this;
     }
 
-    // supersetFetch: function(){
-    //   var self = this;
-    //   var models = _.filter(this.superset, function(model){
-    //     return matchMaker(model, self.getFilterQueries(), {fields: self.fields});
-    //   });
-    //   return this.reset(models);
-    // }
+    // @todo: make matchMaker a base collection method
+    // matchMaker: matchMaker
 
   });
 
