@@ -8,12 +8,10 @@ var Collection = app.Collection.extend({
   extends: ['filtered'],
 
   initialState: {
-    filter: {
-      order: 'ASC',
-      orderby: 'title',
-      limit: 10,
-      qFields: ['title', 'field']
-    }
+    order     : 'asc',
+    orderby   : 'title',
+    per_page  : 10,
+    qFields   : ['title', 'field']
   }
 });
 
@@ -33,10 +31,10 @@ describe('filter collection', function(){
   it('should fetch using initial state', function(){
     collection.fetch();
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
-      orderby: 'title',
-      limit: 10
+    expect(options.data).to.eql({
+      order     : 'asc',
+      orderby   : 'title',
+      per_page  : 10
     });
   });
 
@@ -57,46 +55,46 @@ describe('filter collection', function(){
 
   it('should allow filters to be set', function(){
     // name, value
-    collection.setFilter('limit', -1);
+    collection.setFilter('per_page', -1);
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
-      orderby: 'title',
-      limit: -1
+    expect(options.data).to.eql({
+      order     : 'asc',
+      orderby   : 'title',
+      per_page  : -1
     });
 
     spy.reset();
 
     // set obj
     collection.setFilter({
-      order: 'DESC',
+      order: 'desc',
       orderby: 'price'
     });
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'DESC',
-      orderby: 'price',
-      limit: -1
+    expect(options.data).to.eql({
+      order     : 'desc',
+      orderby   : 'price',
+      per_page  : -1
     });
   });
 
   it('should reset to initial state', function(){
     collection.setFilter({
-      order: 'DESC',
+      order: 'desc',
       orderby: 'price',
-      limit: -1
+      per_page: -1
     });
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'DESC',
+    expect(options.data).to.eql({
+      order: 'desc',
       orderby: 'price',
-      limit: -1
+      per_page: -1
     });
 
     spy.reset();
@@ -105,10 +103,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10
+      per_page: 10
     });
   });
 
@@ -116,10 +114,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10
+      per_page: 10
     });
 
     spy.reset();
@@ -136,10 +134,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       q: 'test',
       qFields: ['title', 'field']
     });
@@ -150,10 +148,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       q: 'test',
       qFields: ['title', 'field']
     });
@@ -166,10 +164,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       q: 'test',
       qFields: ['title', 'field']
     });
@@ -182,10 +180,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       q: 'test',
       qFields: ['title', 'field']
     });
@@ -196,10 +194,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10
+      per_page: 10
     });
 
     expect(collection.hasQuery('__default')).to.be.false;
@@ -210,10 +208,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       q: 'test',
       qFields: ['title', 'field']
     });
@@ -224,10 +222,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10
+      per_page: 10
     });
 
     expect(collection.hasQuery('search')).to.be.false;
@@ -264,10 +262,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       qFields: ['title', 'field'],
       q: [
         { type: 'string', query: 'bar' },
@@ -295,10 +293,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       qFields: ['title', 'field'],
       q: [
         { type: 'string', query: 'bar' },
@@ -314,10 +312,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       qFields: ['title', 'field'],
       q: [
         { type: 'string', query: 'foo' },
@@ -330,10 +328,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10
+      per_page: 10
     });
 
   });
@@ -343,10 +341,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10,
+      per_page: 10,
       qFields: ['title', 'field'],
       q: 'test'
     });
@@ -356,10 +354,10 @@ describe('filter collection', function(){
     collection.fetch();
 
     var options = spy.args[0][2];
-    expect(options.data.filter).to.eql({
-      order: 'ASC',
+    expect(options.data).to.eql({
+      order: 'asc',
       orderby: 'title',
-      limit: 10
+      per_page: 10
     });
 
     expect(collection.hasQuery('search')).to.be.false;
@@ -376,11 +374,11 @@ describe('filter collection', function(){
     expect(collection.map('title')).eqls(['bar', 'baz', 'foo']);
 
     // sort by title DESC
-    collection.setFilter({ order: 'DESC' }).sort();
+    collection.setFilter({ order: 'desc' }).sort();
     expect(collection.map('title')).eqls(['foo', 'baz', 'bar']);
 
     // sort by price
-    collection.setFilter({ orderby: 'price', order: 'ASC' }).sort();
+    collection.setFilter({ orderby: 'price', order: 'asc' }).sort();
     expect(collection.map('price')).eqls([1, 10, 100]);
   });
 

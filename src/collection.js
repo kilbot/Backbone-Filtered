@@ -5,13 +5,27 @@ var matchMaker = require('json-query');
 
 var defaultQueryName = '__default';
 var allowedFilters = [
-  'limit',
+  'context',
+  'page',
+  'per_page',
+  'search',
+  'after',
+  'before',
+  'exclude',
+  'include',
+  'offset',
   'order',
   'orderby',
-  'meta_key',
-  'in',
-  'not_in',
-  'offset'
+  'parent',
+  'parent_exclude',
+  'sku',
+  'featured',
+  'category',
+  'tag',
+  'in_stock',
+  'on_sale',
+  'min_price',
+  'max_price'
   // q,       // added later
   // qFields  // depends on q
 ];
@@ -28,7 +42,7 @@ module.exports = function(parent) {
     },
 
     comparator: function(model){
-      var orderBy = _.get(this.state, ['filter', 'orderby']);
+      var orderBy = _.get(this.state, ['orderby']);
       if(orderBy){
         return model.get( orderBy );
       } else {
@@ -37,7 +51,7 @@ module.exports = function(parent) {
     },
 
     sort: function(options){
-      var order = _.get(this.state, ['filter', 'order'], 'ASC');
+      var order = _.get(this.state, ['order'], 'ASC');
       this.models = _.sortByOrder(this.models, this.comparator.bind(this), order.toLowerCase());
 
       if (!_.get(options, 'silent')) {
@@ -48,9 +62,9 @@ module.exports = function(parent) {
 
     sync: function(method, collection, options){
       if(method === 'read'){
-        var filter = _.get(options, ['data', 'filter']) || this.getFilter();
+        var filter = _.get(options, ['data']) || this.getFilter();
         if( !_.isEmpty(filter) ){
-          _.set(options, ['data', 'filter'], filter);
+          _.set(options, ['data'], filter);
         }
       }
       return parent.prototype.sync.call(this, method, collection, options);
@@ -60,13 +74,14 @@ module.exports = function(parent) {
      *
      */
     getFilter: function(){
-      var filter = _.get(this.state, ['filter']);
-      var obj = _.pick( filter, allowedFilters );
+      var obj = _.pick( this.state, allowedFilters );
+
       var queries = this.compactQueries();
       if( !_.isEmpty(queries) ){
         obj.q = queries;
-        obj.qFields = _.get(filter, 'qFields');
+        obj.qFields = _.get(this.state, 'qFields');
       }
+
       return obj;
     },
 
@@ -77,9 +92,9 @@ module.exports = function(parent) {
       } else {
         obj = name;
       }
-      filter = _.get(this.state, ['filter'], {});
+      filter = _.get(this, 'state', {});
       merged = _.merge(filter, obj);
-      _.set(this, ['state', 'filter'], merged);
+      _.set(this, 'state', merged);
 
       // make chainable
       return this;
@@ -88,12 +103,9 @@ module.exports = function(parent) {
     resetFilters: function(obj){
       if(!_.isObject(obj)){
         var initialState = _.cloneDeep(this.initialState);
-        obj = _.get(initialState, 'filter', {});
+        obj = initialState || {};
       }
-      _.set(this, 'state', {
-        filter: obj,
-        queries: {}
-      });
+      _.set(this, 'state', obj);
 
       // make chainable
       return this;
@@ -136,7 +148,7 @@ module.exports = function(parent) {
         .value();
 
       // add filter.q
-      var q = _.get(this.state, ['filter', 'q']);
+      var q = _.get(this.state, 'q');
       if(_.isString(q)){
         queries.unshift({
           type: 'string',
